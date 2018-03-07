@@ -34,10 +34,10 @@ Space* space_create(Id id) {
 
   	Space *newSpace = NULL;
 
-  	if (id == NO_ID)
+  	if (!id)
     	return NULL;
 
-  	newSpace = (Space *) malloc(sizeof (Space));
+  	newSpace = (Space *) calloc(1,sizeof (Space));
 
   	if (newSpace == NULL) {
     	return NULL;

@@ -33,7 +33,7 @@ Object* object_create(Id id) {
  	if (id == NO_ID)
    	return NULL;
 
-  	newObject = (Object *) malloc(sizeof (Object));
+  	newObject = (Object *) calloc(1,sizeof(Object));
 
   	if (newObject == NULL) {
     	return NULL;
@@ -54,8 +54,6 @@ STATUS object_destroy(Object* object) {
     	return ERROR;
   	}
 
-  	object = NULL;
-  	object->id = 0;
   	free(object);
 
   	return OK;

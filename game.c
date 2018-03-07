@@ -20,6 +20,9 @@
 #include "die.h"
 
 #define N_CALLBACK 10   /*cantidad de comandos que se definen, hay que aumentar el numero cuando se implementen los nuevos comandos*/
+#define ID_object 0
+#define ID_die 0
+#define ID_player 0
 
 /* Define the function type for the callbacks */
 
@@ -74,11 +77,15 @@ STATUS game_create(Game* game) {
   	for (i = 0; i < MAX_SPACES; i++) {
    	game->spaces[i] = NULL;
   	}
+	
+	game->player = player_create(1);
+	game->object = object_create(1);
+	game->die = ID_die;
 
   	game_set_player_location(game, NO_ID);
   	game_set_object_location(game, NO_ID);
   	game->last_cmd = NO_CMD;
-	die_create();
+	game->die = die_create();
 	die_roll(game->die);
 
   	return OK;
@@ -112,6 +119,9 @@ STATUS game_destroy(Game* game) {
   	}
 	
 	die_destroy(game->die);
+	object_destroy(game->object);
+	player_destroy(game->player);	
+
 
   	return OK;
 }
@@ -122,7 +132,7 @@ STATUS game_destroy(Game* game) {
 STATUS game_add_space(Game* game, Space* space) {
   int i = 0;
 
-  	if (space == NULL) {
+  	if (!space) {
     	return ERROR;
   	}
 
@@ -156,7 +166,7 @@ Id game_get_space_id_at(Game* game, int position) {
 Space* game_get_space(Game* game, Id id){
   int i = 0;
 
-  	if (id == NO_ID) {
+  	if (!id) {
     	return NULL;
   	}
 
@@ -174,7 +184,7 @@ Space* game_get_space(Game* game, Id id){
 
 STATUS game_set_player_location(Game* game, Id id) {
 
-  	if (id == NO_ID) {
+  	if (!id) {
     	return ERROR;
   	}
 
@@ -190,7 +200,7 @@ STATUS game_set_object_location(Game* game, Id id) {
 
   	int i;
 
-  	if (id == NO_ID) {
+  	if (!id) {
     	return ERROR;
   	}
 

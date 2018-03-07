@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= -g -Wall -ansi
+CFLAGS= -g -Wall -ansi -pedantic
 
 all: final
 

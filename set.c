@@ -80,7 +80,7 @@ Status conjunto_delete(Conjunto *c)
 
  c->num--; /* Ignora la primera posicion, asignando asi el valor de la segunda posicion del campo num */
 
- c->identificadores[c->num] = 0;  /*Asigna el valor 0 a la nueva posicion */
+ c->identificadores[c->num] = 0;  /*Aigna el valor 0 a la nueva posicion */
 
  return OK;
 }
