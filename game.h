@@ -6,7 +6,7 @@
  * @version 1.1
  * @date 11-02-2018
  * @copyright GNU Public License
- * Comments: 
+ * Comments:
  */
 
 #ifndef GAME_H
@@ -17,12 +17,13 @@
 #include "object.h"
 #include "player.h"
 #include "die.h"
+#include "set.h"
 
 /* Estructura Game con un campo player que recoge la informacion del jugador, un campo object que recoge la informacion del objeto, un campo spaces  y un campo last_cmd de tipo T_command que señala el ultimo comando utilizado */
 
 typedef struct _Game{
   Player *player;
-  Object *object;
+  Object *objects[TAMSET];
   Space* spaces[MAX_SPACES + 1];
   T_Command last_cmd;
   Die* die;

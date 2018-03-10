@@ -14,6 +14,7 @@
 #include <string.h>
 #include "types.h"
 #include "space.h"
+#include "set.h"
 
 /*Estructura _Space que contiene un campo id, un campo nombre, campos para las direcciones (norte,sur,este,oeste) y un campo objeto */
 
@@ -24,7 +25,7 @@ struct _Space {
   Id south;
   Id east;
   Id west;
-  Id object;   /*antes era bool, ahora Id porque si no hay objeto tiene NO_ID*/
+  Conjunto* objects;
 };
 
 /*Funcion: space_create */
@@ -42,7 +43,7 @@ Space* space_create(Id id) {
   	if (newSpace == NULL) {
     	return NULL;
   	}
-  
+
 	newSpace->id = id;
 
   	newSpace->name[0] = '\0';
@@ -52,7 +53,7 @@ Space* space_create(Id id) {
   	newSpace->east = NO_ID;
   	newSpace->west = NO_ID;
 
- 	newSpace->object = FALSE;
+ 	  newSpace->objects = conjunto_create();
 
   	return newSpace;
 }
@@ -61,13 +62,14 @@ Space* space_create(Id id) {
 /*Libera la memoria dinamica reservada para el espacio del paramentro introducido, devolviendo un OK (1) */
 
 STATUS space_destroy(Space* space) {
- 
+
  	if (!space) {
     	return ERROR;
   	}
 
+    conjunto_destroy(space->objects);
+    space->objects = NULL;
   	free(space);
-  	space = NULL;
 
   	return OK;
 }
@@ -76,12 +78,12 @@ STATUS space_destroy(Space* space) {
 /*Esta funcion permite modificar el nombre introducido por parametro, devolviendo un OK tras la modificacion */
 
 STATUS space_set_name(Space* space, char* name) {
-  
+
 	if (!space || !name) {
     	return ERROR;
   	}
 
-  
+
 	if (!strcpy(space->name, name)) {
     	return ERROR;
   	}
@@ -93,11 +95,11 @@ STATUS space_set_name(Space* space, char* name) {
 /*Esta funcion permite modificar la direccion norte a la introducida mediante el parametro id, devolviendo un OK tras la modificacion */
 
 STATUS space_set_north(Space* space, Id id) {
-  
+
 	if (!space || id == NO_ID) {
     	return ERROR;
   	}
-  
+
 	space->north = id;
   	return OK;
 }
@@ -106,11 +108,11 @@ STATUS space_set_north(Space* space, Id id) {
 /*Esta funcion permite modificar la direccion sur a la introducida mediante el parametro id, devolviendo un OK tras la modificacion */
 
 STATUS space_set_south(Space* space, Id id) {
-  
+
 	if (!space || id == NO_ID) {
     	return ERROR;
   	}
-  
+
 	space->south = id;
   	return OK;
 }
@@ -122,7 +124,7 @@ STATUS space_set_east(Space* space, Id id) {
   	if (!space || id == NO_ID) {
     	return ERROR;
   	}
-  
+
 	space->east = id;
   	return OK;
 }
@@ -131,25 +133,27 @@ STATUS space_set_east(Space* space, Id id) {
 /* Esta funcion permite modificar la direccion oeste a la introducida mediante el parametro id, devolviendo un OK tras la modificacion */
 
 STATUS space_set_west(Space* space, Id id) {
-  
+
 	if (!space || id == NO_ID) {
     	return ERROR;
   	}
-  
+
 	space->west = id;
   	return OK;
 }
 
 /*Función: space_set_object */
-/*Esta funcion permite modificar el valor object por el valor introducido mediante el parametro value (tipo BOOL) , devolviendo OK */
+/*Esta funcion permite añadir una id de un object a un conjunto, devuelve OK si
+funciona correctamente o ERROR */
 
-STATUS space_set_object(Space* space, Id value) {
-  
+STATUS space_set_object(Space* space, Id value)
+{
 	if (!space) {
     	return ERROR;
   	}
-  
-	space->object = value;
+
+	conjunto_add(space->objects, value);
+
   	return OK;
 }
 
@@ -157,11 +161,11 @@ STATUS space_set_object(Space* space, Id value) {
 /*Esta funcion permite modificar el nombre introducido por parametro, devolviendo un OK tras la modificacion*/
 
 const char * space_get_name(Space* space) {
-  
+
 	if (!space) {
     	return NULL;
   	}
-  
+
 	return space->name;
 }
 
@@ -169,100 +173,100 @@ const char * space_get_name(Space* space) {
 /*Devuelve el valor id del espacio introducido por parametro */
 
 Id space_get_id(Space* space) {
-  
+
 	if (!space) {
     	return NO_ID;
   	}
-  
+
 	return space->id;
 }
 
 /*Función: space_get_north */
-/*Devuelve el valor de direccion norte del espacio introducido por parametro */ 
+/*Devuelve el valor de direccion norte del espacio introducido por parametro */
 
 Id space_get_north(Space* space) {
-  	
+
 	if (!space) {
     	return NO_ID;
   	}
-  
+
 	return space->north;
 }
 
 /*Función: space_get_south */
-/*Devuelve el valor de direccion sur del espacio introducido por parametro */ 
+/*Devuelve el valor de direccion sur del espacio introducido por parametro */
 
 Id space_get_south(Space* space) {
-  
+
 	if (!space) {
     	return NO_ID;
   	}
-  
+
 	return space->south;
 }
 
 /*Función: space_get_east */
-/*Devuelve el valor de direccion este del espacio introducido por parametro */ 
+/*Devuelve el valor de direccion este del espacio introducido por parametro */
 
 Id space_get_east(Space* space) {
-  
+
 	if (!space) {
     	return NO_ID;
   	}
-  	
+
 	return space->east;
 }
 
 /*Función: space_get_west */
-/*Devuelve el valor de direccion oeste del espacio introducido por parametro */ 
+/*Devuelve el valor de direccion oeste del espacio introducido por parametro */
 
 Id space_get_west(Space* space) {
-  
+
 	if (!space) {
     	return NO_ID;
   	}
-  
+
 	return space->west;
 }
 
 /*Función: space_get_object */
 /*Devuelve el valor object del espacio introducido por parametro */
 
-Id space_get_object(Space* space) {
-  
+Conjunto* space_get_object(Space* space) {
+
 	if (!space) {
-    	return FALSE;
+    	return NULL;
   	}
-  
-	return space->object;
+
+	return space->objects;
 }
 
 /*Función: space_print */
 /*Imprime la información introducida por el usuario */
 
 STATUS space_print(Space* space) {
-  
+  Conjunto* auxset;
 	Id idaux = NO_ID;
 
   	if (!space) {
     	return ERROR;
   	}
- 
+
 	/*Imprime el valor de id y el nombre introducidos*/
-  
+
 	fprintf(stdout, "--> Space (Id: %ld; Name: %s)\n", space->id, space->name);
 
   /*Imprime el valor norte introducido, de no ser correcto o no introducirlo escribe No north link.*/
-  
+
 	idaux = space_get_north(space);
   	if (NO_ID != idaux) {
     	fprintf(stdout, "---> North link: %ld.\n", idaux);
   	} else {
     	fprintf(stdout, "---> No north link.\n");
   	}
-  
+
 /*Imprime el valor sur introducido, de no ser correcto o no introducirlo escribe No south link.*/
-  
+
 	idaux = space_get_south(space);
   	if (NO_ID != idaux) {
     	fprintf(stdout, "---> South link: %ld.\n", idaux);
@@ -271,7 +275,7 @@ STATUS space_print(Space* space) {
   	}
 
   /*Imprime el valor este introducido, de no ser correcto o no introducirlo escribe No east link.*/
-  
+
 	idaux = space_get_east(space);
   	if (NO_ID != idaux) {
     	fprintf(stdout, "---> East link: %ld.\n", idaux);
@@ -280,7 +284,7 @@ STATUS space_print(Space* space) {
   	}
 
   /*Imprime el valor oeste introducido, de no ser correcto o no introducirlo escribe No west link.*/
-  
+
 	idaux = space_get_west(space);
   	if (NO_ID != idaux) {
     	fprintf(stdout, "---> West link: %ld.\n", idaux);
@@ -289,13 +293,13 @@ STATUS space_print(Space* space) {
   	}
 
   /*Imprime Object in the space siempre y cuando haya un obejto mediante la función space_get_object*/
-  
-	if (space_get_object(space)) {
-    	fprintf(stdout, "---> Object in the space.\n");
+
+	if ((auxset = space_get_object(space))!=NULL) {
+    	set_print(stdout, auxset);
+      conjunto_destroy(auxset);
   	} else {
-    	fprintf(stdout, "---> No object in the space.\n");
+    	fprintf(stdout, "---> No objects in the space.\n");
   	}
 
   	return OK;
 }
-

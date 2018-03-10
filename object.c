@@ -6,7 +6,7 @@
  * @version 1.1
  * @date 11-02-2018
  * @copyright GNU Public License
- * Comments: 
+ * Comments:
  */
 
 #include <stdio.h>
@@ -38,8 +38,8 @@ Object* object_create(Id id) {
   	if (newObject == NULL) {
     	return NULL;
   	}
-  
-	newObject->id = id;
+
+	  newObject->id = id;
 
   	newObject->name[0] = '\0';
 
@@ -53,6 +53,8 @@ STATUS object_destroy(Object* object) {
   	if (!object) {
     	return ERROR;
   	}
+
+    object->id = NO_ID;
 
   	free(object);
 
@@ -81,7 +83,7 @@ const char * object_get_name(Object* object) {
   	if (!object) {
     	return NULL;
   	}
-  
+
 	return object->name;
 }
 
@@ -92,7 +94,7 @@ Id object_get_id(Object* object) {
   	if (!object) {
     	return NO_ID;
   	}
-  
+
 	return object->id;
 }
 
@@ -104,12 +106,10 @@ STATUS object_print(Object* object) {
   	if (!object) {
     	return ERROR;
   	}
-  
+
 	/*Imprime el valor de id y el nombre introducidos*/
-  
+
 	fprintf(stdout, "--> Object (Id: %ld; Name: %s)\n", object->id, object->name);
-  
+
   	return OK;
 }
-
-

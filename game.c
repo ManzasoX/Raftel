@@ -18,11 +18,13 @@
 #include "GameReader.h"
 #include "types.h"
 #include "die.h"
+#include "set.h"
 
 #define N_CALLBACK 10   /*cantidad de comandos que se definen, hay que aumentar el numero cuando se implementen los nuevos comandos*/
 #define ID_object 0
 #define ID_die 0
 #define ID_player 0
+#define obj1 0
 
 /* Define the function type for the callbacks */
 
@@ -42,7 +44,7 @@ typedef void (*callback_fn)(Game* game);
 
 /*asigna un numero a cada callback como si fuese una enumeracion para luego utilizar esos numeros para hacer llamadas a estos callbacks */
 
-static callback_fn game_callback_fn_list[N_CALLBACK]={ 
+static callback_fn game_callback_fn_list[N_CALLBACK]={
   game_callback_unknown,
   game_callback_quit,
   game_callback_following,
@@ -71,22 +73,22 @@ STATUS game_set_object_location(Game* game, Id id);
 /*recibe un puntero a un Game y lo inicializa, es decir pone todos los elementos de la estructura a NULL o en su estado negativo */
 
 STATUS game_create(Game* game) {
-  
+
 	int i;
 
   	for (i = 0; i < MAX_SPACES; i++) {
    	game->spaces[i] = NULL;
   	}
-	
+
 	game->player = player_create(1);
-	game->object = object_create(1);
+	game->objects[obj1] = object_create(1);
 	game->die = ID_die;
 
   	game_set_player_location(game, NO_ID);
   	game_set_object_location(game, NO_ID);
   	game->last_cmd = NO_CMD;
-	game->die = die_create();
-	die_roll(game->die);
+	  game->die = die_create();
+	  die_roll(game->die);
 
   	return OK;
 }
@@ -117,10 +119,20 @@ STATUS game_destroy(Game* game) {
   	for (i = 0; (i < MAX_SPACES) && (game->spaces[i] != NULL); i++) {
     	space_destroy(game->spaces[i]);
   	}
-	
+
 	die_destroy(game->die);
-	object_destroy(game->object);
-	player_destroy(game->player);	
+
+  for(i=0; i>TAMSET; i++){
+    game->objects[i] = NULL;
+    object_destroy(game->objects[i]);
+    free(game->objects[i]);
+  }
+
+
+
+
+	player_destroy(game->player);
+
 
 
   	return OK;
@@ -189,7 +201,7 @@ STATUS game_set_player_location(Game* game, Id id) {
   	}
 
   	player_set_space(game->player, id);
-	
+
 	return OK;
 }
 
@@ -207,7 +219,7 @@ STATUS game_set_object_location(Game* game, Id id) {
   	for(i=0; i < MAX_SPACES; i++){   /*Recorre todas las casillas buscando la que coresponda con la id del argumento*/
 
      	if(id == (space_get_id(game->spaces[i]))){
-       	space_set_object(game->spaces[i], object_get_id(game->object));  /*cuando se encuentre la id se asigna el objeto*/
+       	space_set_object(game->spaces[i], object_get_id(game->objects[obj1]));  /*cuando se encuentre la id se asigna el objeto*/
        	return OK;
      	}
   	}
@@ -225,34 +237,35 @@ Id game_get_player_location(Game* game) {
 /* devuelve la localización del objeto almacenada en la estructura game */
 
 Id game_get_object_location(Game* game) {
-	int i;
-	Id objID, objspID;
+	int i,j;
+	Id objID;
 
   	if(!game)
-	return ERROR;
-
-	objID = object_get_id(game->object);
-
-	for(i=0; i< MAX_SPACES; i++){
-
-		objspID = space_get_object(game->spaces[i]);
-
-		if(objspID == objID){
-		return space_get_id(game->spaces[i]);
-
-		}
-	}
 	return NO_ID;
+
+/*guardamos la id del objeto a localizar*/
+	objID = object_get_id(game->objects[obj1]);
+	for(i=0; i< MAX_SPACES; i++)
+  {
+    for(j=0; j<TAMSET; j++){
+		    if(objID == (set_get_id(space_get_object(game->spaces[i]), j)))
+        {
+		        return (space_get_id(game->spaces[i]));
+        }
+    }
+	}
+
+  return NO_ID;
 }
 
 /*Funcion: game_update */
 /* iguala last_cmd a cmd de forma que asi segun el numero de cmd llama a su correspondiente callback*/
 
 STATUS game_update(Game* game, T_Command cmd) {
-  	
+
 	game->last_cmd = cmd;
   	(*game_callback_fn_list[cmd])(game);
-  
+
 	return OK;
 }
 
@@ -260,7 +273,7 @@ STATUS game_update(Game* game, T_Command cmd) {
 /*devuelve el ultimo comando utilizado, almacenado en last_cmd de la estructura game*/
 
 T_Command game_get_last_command(Game* game){
-  
+
 	return game->last_cmd;
 }
 
@@ -268,7 +281,7 @@ T_Command game_get_last_command(Game* game){
 /* imprime en la pantalla los datos del espacio, el objeto y el jugador */
 
 void game_print_data(Game* game) {
-  
+
 	int i = 0;
 
  	 printf("\n\n-------------\n\n");
@@ -286,7 +299,7 @@ void game_print_data(Game* game) {
 /*Funcion: game_is_over */
 
 BOOL game_is_over(Game* game) {
-  
+
 	return FALSE;
 }
 
@@ -305,18 +318,18 @@ void game_callback_following(Game* game) {
   	int i = 0;
   	Id current_id = NO_ID;
   	Id space_id = NO_ID;
-  
+
  	space_id = game_get_player_location(game);
   	if (space_id == NO_ID) {
    	return;
   	}
-  
+
  	for (i = 0; i < MAX_SPACES && game->spaces[i] != NULL; i++) {
     	current_id = space_get_id(game->spaces[i]);
-    	
+
 	if (current_id == space_id) {
       	current_id = space_get_south(game->spaces[i]);
-      	
+
 	if (current_id != NO_ID) {
 	game_set_player_location(game, current_id);
       	}
@@ -332,13 +345,13 @@ void game_callback_previous(Game* game) {
  	 int i = 0;
  	 Id current_id = NO_ID;
  	 Id space_id = NO_ID;
-  
+
   	space_id = game_get_player_location(game);
-  
+
   	if (NO_ID == space_id) {
     	return;
   	}
-  
+
   	for (i = 0; i < MAX_SPACES && game->spaces[i] != NULL; i++) {
     	current_id = space_get_id(game->spaces[i]);
     	if (current_id == space_id) {
@@ -355,32 +368,32 @@ void game_callback_previous(Game* game) {
 /* Permite utilizar el comando take para coger un objeto de una casilla del tablero */
 
 void game_callback_take(Game* game) {
-  
+
   	Id spaceId = NO_ID;
   	Id objectId = NO_ID;
   	Id objectLocId = NO_ID;
   	int aux, i;
 
-  	spaceId = game_get_player_location(game);
-  	objectLocId = game_get_object_location(game);
+  	spaceId = game_get_player_location(game);  /*ID del espacio donde está el jugador*/
+  	objectLocId = game_get_object_location(game); /*ID del espacio donde está el objeto*/
 
   	if (NO_ID == spaceId) {
    	return;
  	 }
 
-  	if (spaceId == objectLocId){
-	
-	for (i = 0; i < MAX_SPACES && game->spaces[i] != NULL; i++) {
-   	
-	if (spaceId == space_get_id(game->spaces[i]))
-   			aux = i;
-   	}		
-	objectId = space_get_object(game->spaces[aux]);
-	space_set_object(game->spaces[aux], NO_ID);
-	player_set_object(game->player, objectId);
-	}	
- 
-  	return;
+  	if (spaceId == objectLocId)/*jugador y objeto en la misma casilla*/
+    {
+	     for (i = 0; i < MAX_SPACES && game->spaces[i] != NULL; i++)/*recorre game->spaces[]*/
+       {
+          if (spaceId == space_get_id(game->spaces[i]))/*busca la posición en game->space[] de la casilla donde se encuentra el jugador*******************************************/
+   			  aux = i;/*game->space donde está el jugador*/
+       }
+
+       objectId = conjunto_delete(space_get_object(game->spaces[aux]));/**************************************************************/
+
+	     player_set_object(game->player, object_get_id(game->objects[0]));
+	   }
+    return;
  }
 
 /*Funcion privada: game_callback_drop*/
@@ -392,7 +405,7 @@ void game_callback_drop(Game* game) {
 	int aux, i;
 
   	spaceId = game_get_player_location(game);
-	
+
 	if (NO_ID == spaceId) {
     	return;
   	}
@@ -404,7 +417,7 @@ void game_callback_drop(Game* game) {
 
 	objectId = player_get_object(game->player);
 	player_set_object(game->player, NO_ID);
-	space_set_object(game->spaces[aux], objectId);	
+	space_set_object(game->spaces[aux], objectId);
 
 	return;
 }
@@ -429,11 +442,11 @@ void game_callback_east(Game* game) {
       	if (current_id != NO_ID) {
 	game_set_player_location(game, current_id);
       	}
-      	return; 
-    	} 
+      	return;
+    	}
   	}
 }
- 
+
 /*Funcion privada: game_callback_west*/
 /* Permite utilizar el comando west para desplazarse a casillas especiales por el tablero */
 
@@ -442,7 +455,7 @@ void game_callback_west(Game* game) {
   	Id current_id = NO_ID;
   	Id space_id = NO_ID;
 
-  	space_id = game_get_player_location(game); 
+  	space_id = game_get_player_location(game);
 
   	if (NO_ID == space_id) {
     	return;
@@ -450,16 +463,16 @@ void game_callback_west(Game* game) {
 
   	for (i = 0; i < MAX_SPACES && game->spaces[i] != NULL; i++) {
     	current_id = space_get_id(game->spaces[i]);
-    	
+
 	if (current_id == space_id) {
       	current_id = space_get_west(game->spaces[i]);
-      
+
 	if (current_id != NO_ID) {
-	game_set_player_location(game, current_id); 
+	game_set_player_location(game, current_id);
       	}
       	return;
-    
-    	} 
+
+    	}
   	}
 }
 
@@ -471,5 +484,3 @@ void game_callback_roll(Game* game){
 	die_roll(game->die);
 
 }
-
-

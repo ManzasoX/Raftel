@@ -1,18 +1,19 @@
-/** 
- * Descripción: Define las funciones y estrucutras utilizadas para space 
- * 
+/**
+ * Descripción: Define las funciones y estrucutras utilizadas para space
+ *
  * @file space.h
- * @author Miguel Manzano 
- * @version 1.1 
+ * @author Miguel Manzano
+ * @version 1.1
  * @date 11-02-2018
  * @copyright GNU Public License
- * Comments: 
+ * Comments:
  */
 
 #ifndef SPACE_H
 #define SPACE_H
 
 #include "types.h"
+#include "set.h"
 
 typedef struct _Space Space;
 
@@ -21,7 +22,7 @@ typedef struct _Space Space;
 
 /* Name: space_create
  * @brief Creamos un espacio mediante un puntero (newSpace) que apunta a id (parametro introducido de tipo long)
- * @param Id: long id 
+ * @param Id: long id
  * @return Space
 */
 
@@ -70,7 +71,7 @@ const char* space_get_name(Space* space);
 STATUS space_set_north(Space* space, Id id);
 
 /* Name: space_get_north
- * @brief Devuelve el valor de direccion norte del espacio introducido por parametro 
+ * @brief Devuelve el valor de direccion norte del espacio introducido por parametro
  * @param Space*: valor space
  * @return Id
 */
@@ -87,7 +88,7 @@ Id space_get_north(Space* space);
 STATUS space_set_south(Space* space, Id id);
 
 /* Name: space_get_south
- * @brief Devuelve el valor de direccion sur del espacio introducido por parametro 
+ * @brief Devuelve el valor de direccion sur del espacio introducido por parametro
  * @param Space*: valor space
  * @return Id
 */
@@ -104,7 +105,7 @@ Id space_get_south(Space* space);
 STATUS space_set_east(Space* space, Id id);
 
 /* Name: space_get_east
- * @brief Devuelve el valor de direccion este del espacio introducido por parametro 
+ * @brief Devuelve el valor de direccion este del espacio introducido por parametro
  * @param Space*: valor space
  * @return Id
 */
@@ -121,7 +122,7 @@ Id space_get_east(Space* space);
 STATUS space_set_west(Space* space, Id id);
 
 /* Name: space_get_west
- * @brief Devuelve el valor de direccion oeste del espacio introducido por parametro 
+ * @brief Devuelve el valor de direccion oeste del espacio introducido por parametro
  * @param Space*: valor space
  * @return Id
 */
@@ -138,12 +139,12 @@ Id space_get_west(Space* space);
 STATUS space_set_object(Space* space, Id value);
 
 /* Name: space_get_object
- * @brief Devuelve el valor object del espacio introducido por parametro 
+ * @brief Devuelve el valor object del espacio introducido por parametro
  * @param Space*: valor space
  * @return BOOL
 */
 
-Id space_get_object(Space* space);
+Conjunto* space_get_object(Space* space);
 
 /* Name: space_print
  * @brief Imprime la información introducida por el usuario
