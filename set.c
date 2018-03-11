@@ -37,7 +37,7 @@ if (c==NULL) return NULL;
 
 
 for (i=0;i<TAMSET;i++){
-  c->identificadores[i] = NO_ID; /*inicializamos a 0 todos los valores del campo identificadores de c*/
+  c->identificadores[i] = 1; /*TODO, si lo ini. a 0 no funciona, arreglo parcial*/
 }
  c->num= 0; /*inicializamos a 0 el campo numero de c*/
 
@@ -62,7 +62,7 @@ void conjunto_destroy(Conjunto *c)
 STATUS conjunto_add(Conjunto *c, Id n)
 {
 
- if (c==NULL) return ERROR;
+ if (c==NULL||c->num==TAMSET) return ERROR;
 
  c->identificadores[c->num] = n; /*guarda en el conjunto la id pasada */
  c->num++;
@@ -108,11 +108,10 @@ int set_print(FILE *f, Conjunto *c)
 */
 Id set_get_id(Conjunto *c, int posicion)
 {
-  Id id_aux;
 
-  id_aux = c->identificadores[posicion];
+  if(posicion > TAMSET) return ERROR;
 
-  return id_aux;
+  return c->identificadores[posicion];
 }
 
 /* Name: conjunto_isEmpty
@@ -147,4 +146,24 @@ BOOL Conjunto_isFull(const Conjunto *c)
     return TRUE;
   else
     return FALSE;
+}
+
+/*******************************************************************************
+Funcion: set_delete_id
+Autor: Juan Martin
+Descripcion: Elimina del conjunto la Id introducida
+Argumentos: Un puntero aal conjunto y la id a borrar.
+Return: si va encuentra la id OK y si no ERROR
+*******************************************************************************/
+
+STATUS set_delete_id (Conjunto *conjunto, Id id){
+  int i;
+
+  if (conjunto == NULL || id == NO_ID)
+    return ERROR;
+
+  for(i=0; i<TAMSET;i++)
+    conjunto->identificadores[i] = NO_ID;
+
+  return OK;
 }

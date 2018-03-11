@@ -85,4 +85,15 @@ BOOL Conjunto_isEmpty(const Conjunto *c);
 
 BOOL Conjunto_isFull(const Conjunto *c);
 
+
+/*******************************************************************************
+Funcion: set_delete_id
+Autor: Juan Martin
+Descripcion: Elimina del conjunto la Id introducida
+Argumentos: Un puntero aal conjunto y la id a borrar.
+Return: si va encuentra la id OK y si no ERROR
+*******************************************************************************/
+
+STATUS set_delete_id (Conjunto *conjunto, Id id);
+
 #endif

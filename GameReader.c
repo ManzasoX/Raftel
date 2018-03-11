@@ -17,7 +17,7 @@
 #include "space.h"
 
 /*Funcion GameReader_load_spaces */
-/*Esta funcion se encarga de leer el fichero data que utilizemos para el tablero y analizarlo 
+/*Esta funcion se encarga de leer el fichero data que utilizemos para el tablero y analizarlo
 para el funcionamiento del programa*/
 
 STATUS GameReader_load_spaces(Game* game, char* filename) {
@@ -28,16 +28,16 @@ STATUS GameReader_load_spaces(Game* game, char* filename) {
   	Id id = NO_ID, north = NO_ID, east = NO_ID, south = NO_ID, west = NO_ID;
   	Space* space = NULL;
   	STATUS status = OK;
-  
+
   	if (!filename) {
     	return ERROR;
   	}
-  
+
   	file = fopen(filename, "r");
   	if (file == NULL) {
     	return ERROR;
  	}
-  	
+
   	while (fgets(line, WORD_SIZE, file)) {
     	if (strncmp("#s:", line, 3) == 0) {
       	toks = strtok(line + 3, "|");
@@ -53,7 +53,7 @@ STATUS GameReader_load_spaces(Game* game, char* filename) {
      	toks = strtok(NULL, "|");
       	west = atol(toks);
 
-#ifdef DEBUG 
+#ifdef DEBUG
 
       	printf("Leido: %ld|%s|%ld|%ld|%ld|%ld\n", id, name, north, east, south, west);
 
@@ -69,13 +69,12 @@ STATUS GameReader_load_spaces(Game* game, char* filename) {
       	}
    	}
   	}
-  
+
   	if (ferror(file)) {
     	status = ERROR;
   	}
-  
+
   	fclose(file);
-  
+
   	return status;
 }
-

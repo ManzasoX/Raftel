@@ -77,7 +77,8 @@ STATUS game_create(Game* game) {
 	int i;
 
   	for (i = 0; i < MAX_SPACES; i++) {
-   	game->spaces[i] = NULL;
+   	  game->spaces[i] = 0;
+      space_set_object(game->spaces[i], NO_ID);
   	}
 
 	game->player = player_create(1);
@@ -103,6 +104,8 @@ STATUS game_create_from_file(Game* game, char* filename) {
 
   	if (GameReader_load_spaces(game, filename) == ERROR)
     	return ERROR;
+
+
 
   	game_set_player_location(game, game_get_space_id_at(game, 0));
   	game_set_object_location(game, game_get_space_id_at(game, 0));
@@ -370,26 +373,25 @@ void game_callback_previous(Game* game) {
 void game_callback_take(Game* game) {
 
   	Id spaceId = NO_ID;
-  	Id objectId = NO_ID;
   	Id objectLocId = NO_ID;
   	int aux, i;
+    aux = 0;
 
   	spaceId = game_get_player_location(game);  /*ID del espacio donde está el jugador*/
   	objectLocId = game_get_object_location(game); /*ID del espacio donde está el objeto*/
-
   	if (NO_ID == spaceId) {
    	return;
  	 }
 
   	if (spaceId == objectLocId)/*jugador y objeto en la misma casilla*/
     {
-	     for (i = 0; i < MAX_SPACES && game->spaces[i] != NULL; i++)/*recorre game->spaces[]*/
+	     for (i = 0; game->spaces[i] != NULL; i++)/*recorre game->spaces[]*/
        {
-          if (spaceId == space_get_id(game->spaces[i]))/*busca la posición en game->space[] de la casilla donde se encuentra el jugador*******************************************/
+          if (spaceId == space_get_id(game->spaces[i]))/*busca la posición en game->space[] de la casilla donde se encuentra el jugador*/
    			  aux = i;/*game->space donde está el jugador*/
        }
 
-       objectId = conjunto_delete(space_get_object(game->spaces[aux]));/**************************************************************/
+       set_delete_id(space_get_object(game->spaces[aux]), object_get_id(game->objects[0]));
 
 	     player_set_object(game->player, object_get_id(game->objects[0]));
 	   }
